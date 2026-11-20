@@ -12,11 +12,13 @@ class HomeScreen extends StatelessWidget {
     required this.controller,
     required this.taskController,
     required this.onOpenSettings,
+    this.onToggleMiniMode,
   });
 
   final TimerController controller;
   final TaskController taskController;
   final VoidCallback onOpenSettings;
+  final VoidCallback? onToggleMiniMode;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class HomeScreen extends StatelessWidget {
               TimerCard(
                 controller: controller,
                 onOpenSettings: onOpenSettings,
+                onToggleMiniMode: onToggleMiniMode,
               ),
               const SizedBox(height: 24),
               TodoSection(

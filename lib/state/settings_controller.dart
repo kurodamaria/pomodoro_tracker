@@ -81,6 +81,18 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateMiniModeAlwaysOnTop(bool value) {
+    _settings = _settings.copyWith(miniModeAlwaysOnTop: value);
+    _persist();
+    notifyListeners();
+  }
+
+  void updateCloseBehavior(CloseBehavior value) {
+    _settings = _settings.copyWith(closeBehavior: value);
+    _persist();
+    notifyListeners();
+  }
+
   /// Restores the factory defaults and re-selects the classic scheme.
   void resetToDefaults() {
     _settings = const TimerSettings();

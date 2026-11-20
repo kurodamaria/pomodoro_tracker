@@ -23,6 +23,19 @@ ThemePreference _themePreferenceFromName(String? name) {
   return ThemePreference.system;
 }
 
+/// What the desktop window does when the user asks to close it.
+enum CloseBehavior { ask, minimizeToTray, quit }
+
+/// Safely resolves a [CloseBehavior] from its serialized [name].
+CloseBehavior _closeBehaviorFromName(String? name) {
+  for (final CloseBehavior value in CloseBehavior.values) {
+    if (value.name == name) {
+      return value;
+    }
+  }
+  return CloseBehavior.ask;
+}
+
 /// A named, immutable timer configuration preset.
 class TimerScheme {
   const TimerScheme({
@@ -108,6 +121,8 @@ class TimerSettings {
     this.addNewTasksToTop = true,
     this.removeCompletedFromTodo = true,
     this.themePreference = ThemePreference.system,
+    this.miniModeAlwaysOnTop = true,
+    this.closeBehavior = CloseBehavior.ask,
   });
 
   final int pomodoroMinutes;
@@ -129,6 +144,12 @@ class TimerSettings {
   final bool removeCompletedFromTodo;
   final ThemePreference themePreference;
 
+  /// Whether Mini Mode keeps the window above all others.
+  final bool miniModeAlwaysOnTop;
+
+  /// Desktop behavior when the window is closed.
+  final CloseBehavior closeBehavior;
+
   TimerSettings copyWith({
     int? pomodoroMinutes,
     int? shortBreakMinutes,
@@ -145,6 +166,8 @@ class TimerSettings {
     bool? addNewTasksToTop,
     bool? removeCompletedFromTodo,
     ThemePreference? themePreference,
+    bool? miniModeAlwaysOnTop,
+    CloseBehavior? closeBehavior,
   }) {
     return TimerSettings(
       pomodoroMinutes: pomodoroMinutes ?? this.pomodoroMinutes,
@@ -163,6 +186,8 @@ class TimerSettings {
       removeCompletedFromTodo:
           removeCompletedFromTodo ?? this.removeCompletedFromTodo,
       themePreference: themePreference ?? this.themePreference,
+      miniModeAlwaysOnTop: miniModeAlwaysOnTop ?? this.miniModeAlwaysOnTop,
+      closeBehavior: closeBehavior ?? this.closeBehavior,
     );
   }
 
@@ -182,6 +207,8 @@ class TimerSettings {
         'addNewTasksToTop': addNewTasksToTop,
         'removeCompletedFromTodo': removeCompletedFromTodo,
         'themePreference': themePreference.name,
+        'miniModeAlwaysOnTop': miniModeAlwaysOnTop,
+        'closeBehavior': closeBehavior.name,
       };
 
   factory TimerSettings.fromJson(Map<String, dynamic> json) {
@@ -205,6 +232,9 @@ class TimerSettings {
           json['removeCompletedFromTodo'] as bool? ?? true,
       themePreference:
           _themePreferenceFromName(json['themePreference'] as String?),
+      miniModeAlwaysOnTop: json['miniModeAlwaysOnTop'] as bool? ?? true,
+      closeBehavior:
+          _closeBehaviorFromName(json['closeBehavior'] as String?),
     );
   }
 }

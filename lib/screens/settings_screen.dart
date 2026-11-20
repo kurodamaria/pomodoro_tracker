@@ -305,6 +305,38 @@ class _ApplicationTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
+        const _SectionTitle('MINI MODE'),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Always on top in Mini Mode'),
+          value: settings.miniModeAlwaysOnTop,
+          onChanged: controller.updateMiniModeAlwaysOnTop,
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<CloseBehavior>(
+          initialValue: settings.closeBehavior,
+          decoration: const InputDecoration(labelText: 'When closing window'),
+          items: const <DropdownMenuItem<CloseBehavior>>[
+            DropdownMenuItem<CloseBehavior>(
+              value: CloseBehavior.ask,
+              child: Text('Ask'),
+            ),
+            DropdownMenuItem<CloseBehavior>(
+              value: CloseBehavior.minimizeToTray,
+              child: Text('Minimize to tray'),
+            ),
+            DropdownMenuItem<CloseBehavior>(
+              value: CloseBehavior.quit,
+              child: Text('Quit'),
+            ),
+          ],
+          onChanged: (CloseBehavior? value) {
+            if (value != null) {
+              controller.updateCloseBehavior(value);
+            }
+          },
+        ),
+        const SizedBox(height: 24),
         const _SectionTitle('TASKS'),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,

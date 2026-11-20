@@ -5,8 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pomodoro_tracker/main.dart';
+import 'package:pomodoro_tracker/services/desktop_window_service.dart';
 import 'package:pomodoro_tracker/services/sound_service.dart';
+import 'package:pomodoro_tracker/widgets/mini_timer_view.dart';
 import 'package:pomodoro_tracker/widgets/timer_card.dart';
+import 'package:pomodoro_tracker/widgets/todo_section.dart';
 
 void main() {
   setUp(() {
@@ -16,7 +19,10 @@ void main() {
   testWidgets('App shell renders and navigation switches views',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
 
     // The app bar title is always visible.
@@ -39,7 +45,10 @@ void main() {
   testWidgets('Timer card controls reflect the run state',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
 
     // Idle: START is available, STOP is disabled.
@@ -66,7 +75,10 @@ void main() {
   testWidgets('Adding a task shows it as the active task in the TimerCard',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
 
     final Finder addButton = find.byIcon(Icons.add);
@@ -89,7 +101,10 @@ void main() {
   testWidgets('Selecting a scheme updates the timer countdown',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
 
     // Open Settings.
@@ -109,7 +124,10 @@ void main() {
   testWidgets('Stats screen shows the daily goal and empty state',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
 
     await tester.tap(find.widgetWithText(TextButton, 'Stats'));
@@ -131,12 +149,39 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      PomodoroTrackerApp(soundService: SoundService(enabled: false)),
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('25 : 00'), findsOneWidget);
     expect(find.text('START'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mini Mode toggles to MiniTimerView and back',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      PomodoroTrackerApp(
+        soundService: SoundService(enabled: false),
+        windowService: DesktopWindowService(enabled: false),
+      ),
+    );
+
+    expect(find.byType(TodoSection), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.picture_in_picture_alt_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MiniTimerView), findsOneWidget);
+    expect(find.byType(TodoSection), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.open_in_full));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MiniTimerView), findsNothing);
+    expect(find.byType(TodoSection), findsOneWidget);
   });
 }

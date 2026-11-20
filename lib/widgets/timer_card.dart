@@ -10,10 +10,12 @@ class TimerCard extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onOpenSettings,
+    this.onToggleMiniMode,
   });
 
   final TimerController controller;
   final VoidCallback onOpenSettings;
+  final VoidCallback? onToggleMiniMode;
 
   Color _phaseColor(TimerPhase phase) {
     switch (phase) {
@@ -68,6 +70,15 @@ class TimerCard extends StatelessWidget {
           tooltip: 'Settings',
           icon: const Icon(Icons.settings, color: Colors.white),
         ),
+        if (onToggleMiniMode != null)
+          IconButton(
+            onPressed: onToggleMiniMode,
+            tooltip: 'Mini Mode',
+            icon: const Icon(
+              Icons.picture_in_picture_alt_outlined,
+              color: Colors.white,
+            ),
+          ),
         Expanded(
           child: Center(
             child: Wrap(
