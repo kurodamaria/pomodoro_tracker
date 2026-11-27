@@ -43,6 +43,8 @@ class _PomodoroTrackerAppState extends State<PomodoroTrackerApp>
     with WindowListener {
   final GlobalKey<ScaffoldMessengerState> _messengerKey =
       GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<NavigatorState> _navigatorKey =
+      GlobalKey<NavigatorState>();
 
   late final LocalStorageService _storage;
   late final SoundService _soundService;
@@ -162,9 +164,14 @@ class _PomodoroTrackerAppState extends State<PomodoroTrackerApp>
       return;
     }
     _isCloseDialogOpen = true;
+    final BuildContext? dialogContext = _navigatorKey.currentContext;
+    if (dialogContext == null || !dialogContext.mounted) {
+      _isCloseDialogOpen = false;
+      return;
+    }
     bool doNotAsk = false;
     final _CloseChoice? choice = await showDialog<_CloseChoice>(
-      context: context,
+      context: dialogContext,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setDialogState) {
@@ -220,11 +227,12 @@ class _PomodoroTrackerAppState extends State<PomodoroTrackerApp>
         (timer.runState == TimerRunState.running ||
             timer.runState == TimerRunState.paused);
     if (runningPomodoro) {
-      if (!mounted) {
+      final BuildContext? dialogContext = _navigatorKey.currentContext;
+      if (dialogContext == null || !dialogContext.mounted) {
         return;
       }
       final bool? confirmed = await showDialog<bool>(
-        context: context,
+        context: dialogContext,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Quit?'),
           content: const Text(
@@ -329,6 +337,7 @@ class _PomodoroTrackerAppState extends State<PomodoroTrackerApp>
           title: 'Pomodoro Tracker',
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: _messengerKey,
+          navigatorKey: _navigatorKey,
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           themeMode: _themeMode,
