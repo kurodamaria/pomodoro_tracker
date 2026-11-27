@@ -96,6 +96,21 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    // The row shows this task's cumulative finish time next to its badge.
+    final Finder taskRow = find
+        .ancestor(
+          of: find.byIcon(Icons.drag_handle),
+          matching: find.byType(Row),
+        )
+        .first;
+    expect(
+      find.descendant(
+        of: taskRow,
+        matching: find.textContaining(RegExp(r'\d{1,2}:\d{2}')),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Selecting a scheme updates the timer countdown',

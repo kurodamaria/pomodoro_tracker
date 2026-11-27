@@ -98,6 +98,31 @@ class TaskController extends ChangeNotifier {
     return total;
   }
 
+  /// Cumulative wall-clock finish time for every uncompleted today task.
+  ///
+  /// Tasks are walked in queue order (ignoring the active category filter so
+  /// a filtered view still reflects everything ahead of it), accumulating the
+  /// same per-pomodoro basis used by [remainingMinutesToday]. The last entry
+  /// therefore matches the section's overall `FINISH TIME`.
+  Map<String, DateTime> estimatedFinishTimesToday({
+    required int pomodoroMinutes,
+    DateTime? now,
+  }) {
+    final DateTime base = now ?? DateTime.now();
+    final Map<String, DateTime> result = <String, DateTime>{};
+    int accumulated = 0;
+    for (final PomodoroTask task in _tasks) {
+      if (task.bucket != TaskBucket.today || task.isCompleted) {
+        continue;
+      }
+      final int remaining =
+          (task.estimatedPomodoros - task.completedPomodoros).clamp(0, 999).toInt();
+      accumulated += remaining * pomodoroMinutes;
+      result[task.id] = base.add(Duration(minutes: accumulated));
+    }
+    return result;
+  }
+
   void addTask({
     required String title,
     TaskBucket bucket = TaskBucket.today,

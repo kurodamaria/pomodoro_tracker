@@ -163,8 +163,16 @@ class _TodoSectionState extends State<TodoSection> {
       ),
       builder: (BuildContext context, Widget? _) {
         final List<PomodoroTask> tasks = widget.taskController.todayTasks;
-        final int remainingMinutes = widget.taskController
-            .remainingMinutesToday(widget.timerController.settings.pomodoroMinutes);
+        final int pomodoroMinutes =
+            widget.timerController.settings.pomodoroMinutes;
+        final DateTime now = DateTime.now();
+        final int remainingMinutes =
+            widget.taskController.remainingMinutesToday(pomodoroMinutes);
+        final Map<String, DateTime> finishTimes =
+            widget.taskController.estimatedFinishTimesToday(
+          pomodoroMinutes: pomodoroMinutes,
+          now: now,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,9 +184,9 @@ class _TodoSectionState extends State<TodoSection> {
             if (tasks.isEmpty)
               _buildEmptyState(context)
             else
-              _buildList(context, tasks),
+              _buildList(context, tasks, finishTimes),
             const SizedBox(height: 12),
-            _buildFooter(context, remainingMinutes),
+            _buildFooter(context, remainingMinutes, now),
           ],
         );
       },
@@ -284,7 +292,11 @@ class _TodoSectionState extends State<TodoSection> {
     );
   }
 
-  Widget _buildList(BuildContext context, List<PomodoroTask> tasks) {
+  Widget _buildList(
+    BuildContext context,
+    List<PomodoroTask> tasks,
+    Map<String, DateTime> finishTimes,
+  ) {
     return ReorderableListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -293,13 +305,19 @@ class _TodoSectionState extends State<TodoSection> {
       // ignore: deprecated_member_use
       onReorder: widget.taskController.reorderTodayTask,
       itemBuilder: (BuildContext context, int index) {
-        return _buildRow(context, tasks[index], index);
+        return _buildRow(context, tasks[index], index, finishTimes);
       },
     );
   }
 
-  Widget _buildRow(BuildContext context, PomodoroTask task, int index) {
+  Widget _buildRow(
+    BuildContext context,
+    PomodoroTask task,
+    int index,
+    Map<String, DateTime> finishTimes,
+  ) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
+    final DateTime? finishTime = finishTimes[task.id];
     return Padding(
       key: ValueKey<String>(task.id),
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -320,6 +338,15 @@ class _TodoSectionState extends State<TodoSection> {
             child: Text(task.title, overflow: TextOverflow.ellipsis),
           ),
           const SizedBox(width: 8),
+          if (finishTime != null) ...<Widget>[
+            Text(
+              _formatTime(context, finishTime),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(width: 8),
+          ],
           InkWell(
             onTap: () => widget.taskController.incrementEstimate(task.id),
             borderRadius: BorderRadius.circular(AppTheme.controlRadius),
@@ -363,9 +390,8 @@ class _TodoSectionState extends State<TodoSection> {
     );
   }
 
-  Widget _buildFooter(BuildContext context, int remainingMinutes) {
-    final DateTime finish =
-        DateTime.now().add(Duration(minutes: remainingMinutes));
+  Widget _buildFooter(BuildContext context, int remainingMinutes, DateTime now) {
+    final DateTime finish = now.add(Duration(minutes: remainingMinutes));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

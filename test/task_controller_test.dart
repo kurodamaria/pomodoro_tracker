@@ -90,5 +90,30 @@ void main() {
       controller.setCategoryFilter(null);
       expect(controller.todayTasks.length, 2);
     });
+
+    test('estimatedFinishTimesToday accumulates in queue order', () {
+      final controller = TaskController();
+      final DateTime now = DateTime(2026, 5, 1, 9);
+
+      // Newest goes to the top, so the queue is: Long task, Short task.
+      controller.addTask(title: 'Short task', estimatedPomodoros: 3);
+      controller.addTask(title: 'Long task', estimatedPomodoros: 4);
+
+      final PomodoroTask longTask = controller.todayTasks[0];
+      final PomodoroTask shortTask = controller.todayTasks[1];
+      expect(longTask.title, 'Long task');
+
+      final Map<String, DateTime> finishTimes =
+          controller.estimatedFinishTimesToday(pomodoroMinutes: 25, now: now);
+      expect(finishTimes[longTask.id], now.add(const Duration(minutes: 100)));
+      expect(finishTimes[shortTask.id], now.add(const Duration(minutes: 175)));
+
+      controller.toggleComplete(longTask.id);
+      final Map<String, DateTime> after = controller
+          .estimatedFinishTimesToday(pomodoroMinutes: 25, now: now);
+      expect(after.containsKey(longTask.id), isFalse);
+      expect(after.length, 1);
+      expect(after[shortTask.id], now.add(const Duration(minutes: 75)));
+    });
   });
 }
